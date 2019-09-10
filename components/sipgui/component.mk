@@ -1,0 +1,11 @@
+# CSRCS += gui.c
+# CSRCS += img_bubble_pattern.c
+
+# gui 
+
+CFLAGS += -DLV_CONF_INCLUDE_SIMPLE
+
+COMPONENT_SRCDIRS := . 
+	
+COMPONENT_ADD_INCLUDEDIRS := $(COMPONENT_SRCDIRS) .. ../
+

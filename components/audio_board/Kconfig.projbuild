@@ -1,0 +1,16 @@
+menu "Audio board select"
+
+choice AUDIO_BOARD
+    prompt "Audio board"
+    default ESP32_ADF_REVC_BOARD
+    help
+        Select an audio board to use with the ESP-ADF
+        
+config ESP32_ADF_REVB_BOARD
+    bool "ESP32-ADF Rev B"
+config ESP32_ADF_REVC_BOARD
+    bool "ESP32-ADF Rev C"
+endchoice
+
+endmenu
+
