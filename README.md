@@ -1,6 +1,6 @@
 # SIP Phone Example
 
-This example allows users to make calls over the internet.
+This example allows users to make calls over the internet. The project is basic, but you are free to evolute.
 
 ## Compatibility
 
