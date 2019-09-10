@@ -40,6 +40,11 @@ Configure the example:
 - Create the SIP extension, ex: 100 (see below)
 - Set up SIP URI in `menuconfig` > `VOIP App Configuration` > `SIP_URI`.
 
+Upload the example:
+```bash
+make flash monitor
+```
+
 Configure external application:
 
  Setup the PBX Server like Yet Another Telephony Engine (FreePBX/FreeSwitch or any other PBXs)
