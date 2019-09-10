@@ -26,7 +26,8 @@ Prepare the audio board:
 Load the example:
 ```bash
 git clone TO BE FILLED
-cd  TO BE FILLED
+cd  sip_phone_example
+git submodule update --init
 ./configure
 make menuconfig
 ```
