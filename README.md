@@ -28,7 +28,7 @@ Load the example:
 git clone TO BE FILLED
 cd  sip_phone_example
 git submodule update --init
-./configure
+cp lvgl_component.mk components/lvgl/component.mk
 make menuconfig
 ```
 
