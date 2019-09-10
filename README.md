@@ -25,7 +25,7 @@ Prepare the audio board:
 
 Load the example:
 ```bash
-git clone TO BE FILLED
+git clone --recursive https://github.com/d3v1c3nv11/sip_phone_example.git
 cd  sip_phone_example
 git submodule update --init
 cp lvgl_component.mk components/lvgl/component.mk
