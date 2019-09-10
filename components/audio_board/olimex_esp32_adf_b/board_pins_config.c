@@ -85,7 +85,7 @@ esp_err_t i2s_mclk_gpio_select(i2s_port_t i2s_num, gpio_num_t gpio_num)
         ESP_LOGE(TAG, "Does not support i2s number(%d)", i2s_num);
         return ESP_ERR_INVALID_ARG;
     }
-    if (gpio_num != GPIO_NUM_4 && gpio_num != GPIO_NUM_1 && gpio_num != GPIO_NUM_3) {
+    if (gpio_num != GPIO_NUM_0 && gpio_num != GPIO_NUM_1 && gpio_num != GPIO_NUM_3) {
         ESP_LOGE(TAG, "Only support GPIO0/GPIO1/GPIO3, gpio_num:%d", gpio_num);
         return ESP_ERR_INVALID_ARG;
     }
