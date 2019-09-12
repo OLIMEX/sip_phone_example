@@ -7,6 +7,8 @@ This example allows users to make calls over the internet. The project is basic,
 ESP32-ADF
 https://www.olimex.com/Products/IoT/ESP32/ESP32-ADF/open-source-hardware
 
+![ESP32-ADF](https://olimex.files.wordpress.com/2019/08/esp32-adf-sip1.jpg?w=535)
+
 # Get ESP-ADF
 ```bash
 cd ~/
