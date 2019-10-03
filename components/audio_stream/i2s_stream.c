@@ -249,7 +249,7 @@ static int _i2s_process(audio_element_handle_t self, char *in_buffer, int in_len
 
 //        if ((i2s->config.i2s_config.mode & I2S_MODE_DAC_BUILT_IN) != 0) {
 //            memset(buf, 0x80, i2s->config.i2s_config.dma_buf_len * 4);
-        }
+//        }
         while (index--) {
             i2s_write(i2s->config.i2s_port, (char *)buf, i2s->config.i2s_config.dma_buf_len * 4, &bytes_written, portMAX_DELAY);
         }
