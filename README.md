@@ -12,8 +12,9 @@ https://www.olimex.com/Products/IoT/ESP32/ESP32-ADF/open-source-hardware
 # Get ESP-ADF
 ```bash
 cd ~/
-git clone --recursive https://github.com/espressif/esp-adf.git
+git clone https://github.com/espressif/esp-adf.git
 cd esp-adf
+git checkout tags/v2.0-beta1-55-g9bcaec2
 git submodule update --init
 export ADF_PATH=~/esp-adf
 ```
