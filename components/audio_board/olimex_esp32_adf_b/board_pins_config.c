@@ -75,7 +75,7 @@ esp_err_t get_spi_pins(spi_bus_config_t *spi_config, spi_device_interface_config
 
     spi_device_interface_config->spics_io_num = GPIO_NUM_21;
 
-    ESP_LOGW(TAG, "SPI interface is not supported");
+    ESP_LOGW(TAG, "SPI interface is supported by UEXT");
     return ESP_OK;
 }
 

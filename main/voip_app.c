@@ -43,10 +43,15 @@
 #include "sipgui/gui.h"
 #include "board_pins_config.h"
 
-#define FAILLING_END_GAIN       1
-#define RISING_START_GAIN       2
-#define MUSIC_GAIN_DB          -10
-#define PLAY_STATUS            ESP_DOWNMIX_TYPE_OUTPUT_ONE_CHANNEL
+#define RTP_HEADER_LEN 12
+#define AUDIO_FRAME_SIZE (160)
+
+#define I2S_SAMPLE_RATE     48000
+#define I2S_CHANNEL         2
+#define I2S_BITS            16
+
+#define G711_SAMPLE_RATE    8000
+#define G711_CHANNEL        1
 
 
 // ==== Display dimensions in pixels ============================
@@ -63,31 +68,17 @@ static void IRAM_ATTR lv_tick_task(void);
 static int mp3_pos;
 static const char *TAG = "SIP_PHONE";
 
-#define RTP_HEADER_LEN 12
-#define AUDIO_FRAME_SIZE (160)
-
-#define I2S_SAMPLE_RATE     48000
-#define I2S_CHANNEL         2
-#define I2S_BITS            16
-
-#define G711_SAMPLE_RATE    8000
-#define G711_CHANNEL        1
-
 sip_handle_t sip;
 static esp_err_t g711enc_pipeline_open();
 static esp_err_t g711dec_pipeline_open();
 audio_element_handle_t i2s_stream_reader;
 audio_element_handle_t raw_read;
-audio_element_handle_t raw_write,el_raw_write,speaker_raw_write;
-audio_pipeline_handle_t speaker,ringer,master;
-audio_element_handle_t mp3_decoder;
-audio_element_handle_t filter,downmixer;
-audio_element_handle_t efilter;
+audio_element_handle_t raw_write;
 audio_element_handle_t pipeline;
 audio_pipeline_handle_t recorder;
 audio_event_iface_handle_t evt;    
 audio_element_handle_t i2s_stream_writer;
-
+audio_element_handle_t efilter;
 static uint8_t registrated = 0;
 static uint8_t autoanswer = 0;
 static uint8_t ringin = 0;
@@ -100,6 +91,20 @@ static uint8_t ringin = 0;
 #define PLAYBACK_BITS       16
 
 
+
+#ifdef ringer
+audio_element_handle_t filter,downmixer;
+
+
+audio_pipeline_handle_t speaker,ringer,master,el_raw_write,speaker_raw_write;
+;
+audio_element_handle_t mp3_decoder;
+#define SAMPLERATE 48000
+#define DEFAULT_CHANNEL 1
+#define TRANSMITTIME 10
+#define MUSIC_GAIN_DB 0
+#define PLAY_STATUS ESP_DOWNMIX_OUTPUT_TYPE_ONE_CHANNEL
+#define NUMBER_SOURCE_FILE 2
 
 extern const uint8_t adf_music_mp3_start[] asm("_binary_adf_music_mp3_start");
 extern const uint8_t adf_music_mp3_end[]   asm("_binary_adf_music_mp3_end");
@@ -118,7 +123,7 @@ int mp3_music_read_cb(audio_element_handle_t el, char *buf, int len, TickType_t 
     mp3_pos += read_size;
     return read_size;
 }
-
+#endif
 static esp_err_t g711enc_pipeline_open()
 {
    
@@ -193,65 +198,17 @@ static  esp_err_t play_ring(void)
 	ringin = 0;
 	return ESP_OK;
 	
-	// TODO: Play ring tone here:
-	//mp3_pos = 0;	
-	//audio_pipeline_run(ringer);
-	////audio_pipeline_resume(ringer);
-	//ESP_LOGI(TAG, "[3.3] downmix_set_second_input");
-    //downmix_set_second_input_rb_timeout(downmixer, portMAX_DELAY);
-    //// When pipeline_tone is finished, downmixer will change status to `DOWNMIX_SWITCH_OFF`
-    //downmix_set_play_status(downmixer, DOWNMIX_SWITCH_ON);
-
-	  
-	 //while (1) {
-		 //vTaskDelay(2);
-	
-        //audio_event_iface_msg_t msg;
-        //esp_err_t ret = audio_event_iface_listen(evt, &msg, portMAX_DELAY);
-        //if (ret != ESP_OK) {
-            //ESP_LOGE(TAG, "[ * ] Event interface error : %d", ret);
-            //continue;
-        //}
-        //if (msg.source_type == AUDIO_ELEMENT_TYPE_ELEMENT
-            //&& msg.source == (void *) mp3_decoder
-            //&& msg.cmd == AEL_MSG_CMD_REPORT_MUSIC_INFO) {
-            //audio_element_info_t music_info = {0};
-            //audio_element_getinfo(mp3_decoder, &music_info);
-            //ESP_LOGE(TAG, "[ * ] Receive music info from mp3 decoder, sample_rates=%d, bits=%d, ch=%d",
-                     //music_info.sample_rates, music_info.bits, music_info.channels);
-            //downmix_set_base_file_info(downmixer, music_info.sample_rates, music_info.channels);
-            //music_info.channels = PLAY_STATUS + 1;
-            //audio_element_setinfo(i2s_stream_writer, &music_info);
-            //i2s_stream_set_clk(i2s_stream_writer, music_info.sample_rates, music_info.bits, music_info.channels);   
-            //continue;
-        //}
-        ///* Stop when the last pipeline element (i2s_stream_writer in this case) receives stop event */
-        //if (msg.source_type == AUDIO_ELEMENT_TYPE_ELEMENT && msg.source == (void *) i2s_stream_writer
-            //&& msg.cmd == AEL_MSG_CMD_REPORT_STATUS
-            //&& (((int)msg.data == AEL_STATUS_STATE_STOPPED) || ((int)msg.data == AEL_STATUS_STATE_FINISHED))) {
-            //ESP_LOGW(TAG, "[ * ] Stop event received");
-            //break;
-        //}
-	//}
-	 
-	 //ringin = 0;
-//return ESP_OK;   
-	
 }
 
 static esp_err_t g711dec_pipeline_open()
 {
+    audio_element_handle_t i2s_stream_writer;
     audio_pipeline_cfg_t pipeline_cfg = DEFAULT_AUDIO_PIPELINE_CONFIG();
-    speaker = audio_pipeline_init(&pipeline_cfg);
-    ringer = audio_pipeline_init(&pipeline_cfg);
-    master = audio_pipeline_init(&pipeline_cfg);
-    
-  //  audio_pipeline_cfg_t pipeline_tone_cfg = DEFAULT_AUDIO_PIPELINE_CONFIG();
-    
-
-    if ((NULL == speaker) || (NULL == master) || (NULL == ringer)){
+    audio_pipeline_handle_t speaker = audio_pipeline_init(&pipeline_cfg);
+    if (NULL == speaker) {
         return ESP_FAIL;
     }
+
     raw_stream_cfg_t raw_cfg = RAW_STREAM_CFG_DEFAULT();
     raw_cfg.type = AUDIO_STREAM_WRITER;
     raw_write = raw_stream_init(&raw_cfg);
@@ -262,109 +219,29 @@ static esp_err_t g711dec_pipeline_open()
     rsp_cfg.dest_rate = I2S_SAMPLE_RATE;
     rsp_cfg.dest_ch = I2S_CHANNEL;
     rsp_cfg.complexity = 5;
-    rsp_cfg.type = AUDIO_CODEC_TYPE_DECODER;
-    rsp_cfg.task_core = 0;
-    filter = rsp_filter_init(&rsp_cfg);
+    audio_element_handle_t filter = rsp_filter_init(&rsp_cfg);
 
     i2s_stream_cfg_t i2s_cfg = I2S_STREAM_CFG_DEFAULT();
     i2s_cfg.type = AUDIO_STREAM_WRITER;
     i2s_stream_writer = i2s_stream_init(&i2s_cfg);
-    
     audio_element_info_t i2s_info = {0};
     audio_element_getinfo(i2s_stream_writer, &i2s_info);
     i2s_info.bits = I2S_BITS;
     i2s_info.channels = I2S_CHANNEL;
     i2s_info.sample_rates = I2S_SAMPLE_RATE;
     audio_element_setinfo(i2s_stream_writer, &i2s_info);
-    
-    ESP_LOGI(TAG, "[2.1] Create mp3 decoder to decode mp3 file and set custom read callback");
-    mp3_decoder_cfg_t mp3_cfg = DEFAULT_MP3_DECODER_CONFIG();
-    mp3_cfg.task_core = 1;
-    mp3_decoder = mp3_decoder_init(&mp3_cfg);
-    audio_element_set_read_cb(mp3_decoder, mp3_music_read_cb, NULL);
-    
-    
-    
-    ESP_LOGI(TAG, "[2.3] Create downmixer");
-    downmix_cfg_t downmix_cfg = DEFAULT_DOWNMIX_CONFIG();
-    downmix_cfg.downmix_info.gain[FAILLING_END_GAIN] = MUSIC_GAIN_DB;
-    downmix_cfg.downmix_info.gain[RISING_START_GAIN] = MUSIC_GAIN_DB;
-    downmixer = downmix_init(&downmix_cfg);
-    ESP_LOGI(TAG, "[3.1] Create raw stream to write data");
-    
-      
-    raw_cfg.type = AUDIO_STREAM_WRITER;
-    el_raw_write = raw_stream_init(&raw_cfg);
-    speaker_raw_write = raw_stream_init(&raw_cfg);
-    ESP_LOGI(TAG, "[2.2] Register all elements to audio pipeline");
-      
+
     audio_pipeline_register(speaker, raw_write, "raw");
     audio_pipeline_register(speaker, filter, "filter");
-    audio_pipeline_register(speaker, speaker_raw_write, "speaker_raw");
-    
-    audio_pipeline_register(master, downmixer,"mixer");
-    audio_pipeline_register(master, i2s_stream_writer, "i2s");
-    
-    audio_pipeline_link(speaker, (const char *[]) {"raw", "filter","speaker_raw"}, 3);
-    
-       
-    audio_pipeline_register(ringer, mp3_decoder, "mp3");
-    audio_pipeline_register(ringer, el_raw_write, "ring_raw");
-    
-    ESP_LOGI(TAG, "[3.6] Link elements together fatfs_stream-->raw_stream");
-    audio_pipeline_link(ringer, (const char *[]) {"mp3", "ring_raw"}, 2);
-    
-    
-    
-    
-    
-    audio_pipeline_link(master, (const char *[]) {"mixer", "i2s"}, 2);
- 	ESP_LOGI(TAG, "[ 3 ] Set up  event listener");
- 	
-    audio_event_iface_cfg_t evt_cfg = AUDIO_EVENT_IFACE_DEFAULT_CFG();
-    
-	evt = audio_event_iface_init(&evt_cfg);
-	
-
-
-	audio_pipeline_set_listener(master,evt);
-	    ESP_LOGI(TAG, "master,evt");
- 	audio_pipeline_set_listener(ringer,evt);
-	    ESP_LOGI(TAG, "ringer,evt");
-	    audio_pipeline_set_listener(speaker,evt);
-	    ESP_LOGI(TAG, "speaker,evt");
-	audio_element_msg_set_listener(mp3_decoder, evt);
+    audio_pipeline_register(speaker, i2s_stream_writer, "i2s");
+    audio_pipeline_link(speaker, (const char *[]) {"raw", "filter", "i2s"}, 3);
+    audio_pipeline_run(speaker);
     ESP_LOGI(TAG, "Speaker has been created");
-
-    
-
-    ESP_LOGI(TAG, "[5.2] Connect input ringbuffer of pipeline_base & pipeline_newcome to downmixer input");
-    ringbuf_handle_t rb = audio_element_get_input_ringbuf(speaker_raw_write);
-    
-    
-    audio_element_set_input_ringbuf(downmixer, rb);
-    
-    rb = audio_element_get_input_ringbuf(el_raw_write);
-    downmix_set_second_input_rb(downmixer, rb);
-    
-    audio_pipeline_run(speaker);    
-    audio_pipeline_run(master);
-    downmix_set_output_status(downmixer, PLAY_STATUS);
     return ESP_OK;
 }
 
-
 static int _g711_decode(char *data, int len)
 {
-	
-	
-	if (guistatus != talking)
-	{
-		ESP_LOGE(TAG, "_g711_decoder error");
-		 return 0;
-	}
-	
-	
 	
     int16_t *dec_buffer = (int16_t *)audio_malloc(2 * (len - RTP_HEADER_LEN));
 
@@ -378,8 +255,8 @@ static int _g711_decode(char *data, int len)
 
     raw_stream_write(raw_write, (char *)dec_buffer, 2 * (len - RTP_HEADER_LEN));
     free(dec_buffer);
-   // ESP_LOGI(TAG, "_g711_decoded");
     return 2 * (len - RTP_HEADER_LEN);
+    
 }
 
 static ip4_addr_t _get_network_ip()
@@ -393,6 +270,7 @@ static int _sip_event_handler(sip_event_msg_t *event)
 {
     ip4_addr_t ip;
     switch ((int)event->type) {
+
         case SIP_EVENT_REQUEST_NETWORK_STATUS:
             ESP_LOGI(TAG, "SIP_EVENT_REQUEST_NETWORK_STATUS");
             ip = _get_network_ip();
@@ -484,13 +362,19 @@ static int _sip_event_handler(sip_event_msg_t *event)
             ESP_LOGI(TAG, "SIP_EVENT_AUDIO_SESSION_END");
             
             clear_screen();
-            
+     
             
             break;
+            
+            
         case SIP_EVENT_READ_AUDIO_DATA:
             return _g711_encode(event->data, event->data_len);
         case SIP_EVENT_WRITE_AUDIO_DATA:
             return _g711_decode(event->data, event->data_len);
+        case SIP_EVENT_READ_DTMF:
+            ESP_LOGI(TAG, "SIP_EVENT_READ_DTMF ID : %d ", ((char *)event->data)[0]);
+            break;   
+
     }
     
     

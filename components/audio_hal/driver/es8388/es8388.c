@@ -28,10 +28,6 @@
 #include "es8388.h"
 #include "board_pins_config.h"
 
-#ifdef CONFIG_ESP_LYRAT_V4_3_BOARD
-#include "headphone_detect.h"
-#endif
-
 static const char *ES_TAG = "ES8388_DRIVER";
 
 #define ES_ASSERT(a, format, b, ...) \
@@ -52,9 +48,10 @@ audio_hal_func_t AUDIO_CODEC_ES8388_DEFAULT_HANDLE = {
     .audio_codec_deinitialize = es8388_deinit,
     .audio_codec_ctrl = es8388_ctrl_state,
     .audio_codec_config_iface = es8388_config_i2s,
-    .audio_codec_set_mute = es8388_set_voice_mute,
     .audio_codec_set_volume = es8388_set_voice_volume,
     .audio_codec_get_volume = es8388_get_voice_volume,
+    .audio_codec_write_reg = es8388_write_reg,
+    .audio_codec_read_reg = es8388_read_reg,
 };
 
 static int es_write_reg(uint8_t slave_add, uint8_t reg_add, uint8_t data)
@@ -94,6 +91,7 @@ static int es_read_reg(uint8_t reg_add, uint8_t *pData)
     i2c_cmd_link_delete(cmd);
 
     ES_ASSERT(res, "es_read_reg error", -1);
+   // printf("es8388 read byte 0x%02x: 0x%02x\r\n",reg_add,data);
     *pData = data;
     return res;
 }
@@ -116,7 +114,10 @@ void es8388_read_all()
         ets_printf("%x: %x\n", i, reg);
     }
 }
-
+int es8388_read_reg(uint8_t reg_add, uint8_t *data)
+{
+    return es_read_reg(reg_add, &data);
+}
 int es8388_write_reg(uint8_t reg_add, uint8_t data)
 {
     return es_write_reg(ES8388_ADDR, reg_add, data);
@@ -262,11 +263,6 @@ esp_err_t es8388_deinit(void)
 {
     int res = 0;
     res = es_write_reg(ES8388_ADDR, ES8388_CHIPPOWER, 0xFF);  //reset and stop es8388
-    i2c_driver_delete(I2C_NUM_0);
-#ifdef CONFIG_ESP_LYRAT_V4_3_BOARD
-    headphone_detect_deinit();
-#endif
-
     return res;
 }
 
@@ -279,6 +275,7 @@ esp_err_t es8388_init(audio_hal_codec_config_t *cfg)
 {
     int res = 0;
 #ifdef CONFIG_ESP_LYRAT_V4_3_BOARD
+#include "headphone_detect.h"
     headphone_detect_init(get_headphone_detect_gpio());
 #endif
 
@@ -383,7 +380,6 @@ int es8388_set_voice_volume(int volume)
     res |= es_write_reg(ES8388_ADDR, ES8388_DACCONTROL27, volume);
     return res;
 }
-
 /**
  *
  * @return
@@ -435,7 +431,7 @@ int es8388_set_bits_per_sample(es_module_t mode, es_bits_length_t bits_length)
 }
 
 /**
- * @brief Configure ES8388 DAC mute or not. Basically you can use this function to mute the output or unmute
+ * @brief Configure ES8388 DAC mute or not. Basicly you can use this function to mute the output or don't
  *
  * @param enable: enable or disable
  *
@@ -443,7 +439,7 @@ int es8388_set_bits_per_sample(es_module_t mode, es_bits_length_t bits_length)
  *     - (-1) Parameter error
  *     - (0)   Success
  */
-int es8388_set_voice_mute(bool enable)
+int es8388_set_voice_mute(int enable)
 {
     int res;
     uint8_t reg = 0;
@@ -562,6 +558,7 @@ int es8388_config_i2s(audio_hal_codec_mode_t mode, audio_hal_codec_i2s_iface_t *
 
 void es8388_pa_power(bool enable)
 {
+	/*
     gpio_config_t  io_conf;
     memset(&io_conf, 0, sizeof(io_conf));
     io_conf.intr_type = GPIO_PIN_INTR_DISABLE;
@@ -575,4 +572,5 @@ void es8388_pa_power(bool enable)
     } else {
         gpio_set_level(get_pa_enable_gpio(), 0);
     }
+    * */
 }

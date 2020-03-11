@@ -35,7 +35,6 @@
 #define SDCARD_OPEN_FILE_NUM_MAX  5
 #define SDCARD_INTR_GPIO          -1 //GPIO_NUM_34
 
-
 #define BUTTON_REC_ID             GPIO_NUM_36
 #define BUTTON_MODE_ID            GPIO_NUM_39
 #define BUTTON_SET_ID             TOUCH_PAD_NUM9
@@ -47,7 +46,8 @@
 #define HEADPHONE_DETCET          -1 //GPIO_NUM_19
 #define PA_ENABLE_GPIO            -1 //GPIO_NUM_21
 
-#define GREEN_LED_GPIO            GPIO_NUM_2
+#define GREEN_LED_GPIO          GPIO_NUM_2
+#define IR_RED_RXD		GPIO_NUM_22
 
 #define SPI_PORT HSPI_HOST
 #define DISP_SPI_MOSI 13
@@ -58,7 +58,10 @@
 #define ILI9341_BCKL -1
 #define I2C_PORT I2C_NUM_0
 #define I2C_SDA	18
+#define I2C_SCL	23
 
+#define UARTTX	GPIO_NUM_19
+#define UARTRX 	34
 #define AUDIO_CODEC_DEFAULT_CONFIG(){                   \
         .adc_input  = AUDIO_HAL_ADC_INPUT_LINE1,        \
         .dac_output = AUDIO_HAL_DAC_OUTPUT_ALL,         \

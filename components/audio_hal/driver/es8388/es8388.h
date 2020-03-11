@@ -195,7 +195,7 @@ esp_err_t es8388_set_voice_volume(int volume);
 esp_err_t es8388_get_voice_volume(int *volume);
 
 /**
- * @brief Configure ES8388 DAC mute or not. Basically you can use this function to mute the output or unmute
+ * @brief Configure ES8388 DAC mute or not. Basically you can use this function to mute the output or not
  *
  * @param enable enable(1) or disable(0)
  *
@@ -203,7 +203,7 @@ esp_err_t es8388_get_voice_volume(int *volume);
  *     - ESP_FAIL Parameter error
  *     - ESP_OK   Success
  */
-esp_err_t es8388_set_voice_mute(bool enable);
+esp_err_t es8388_set_voice_mute(int enable);
 
 /**
  * @brief Get ES8388 DAC mute status
@@ -259,7 +259,7 @@ esp_err_t es8388_config_dac_output(es_dac_output_t output);
  *     - ESP_OK   Success
  */
 esp_err_t es8388_write_reg(uint8_t reg_add, uint8_t data);
-
+int es8388_read_reg(uint8_t reg_add, uint8_t *data);
 /**
  * @brief Print all ES8388 registers
  *

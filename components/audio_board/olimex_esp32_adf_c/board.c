@@ -24,6 +24,7 @@
 
 #include "esp_log.h"
 #include "board.h"
+#include "board_def.h"
 #include "audio_mem.h"
 
 #include "periph_sdcard.h"
@@ -127,4 +128,3 @@ esp_err_t audio_board_deinit(audio_board_handle_t audio_board)
     board_handle = NULL;
     return ret;
 }
-

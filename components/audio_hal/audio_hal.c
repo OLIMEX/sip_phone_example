@@ -104,16 +104,6 @@ esp_err_t audio_hal_config_iface(audio_hal_handle_t audio_hal, audio_hal_codec_m
     return ret;
 }
 
-esp_err_t audio_hal_set_mute(audio_hal_handle_t audio_hal, bool mute)
-{
-    esp_err_t ret;
-    AUDIO_HAL_CHECK_NULL(audio_hal, "audio_hal handle is null", -1);
-    mutex_lock(audio_hal->audio_hal_lock);
-    ret = audio_hal->audio_codec_set_mute(mute);
-    mutex_unlock(audio_hal->audio_hal_lock);
-    return ret;
-}
-
 esp_err_t audio_hal_set_volume(audio_hal_handle_t audio_hal, int volume)
 {
     esp_err_t ret;
@@ -133,4 +123,27 @@ esp_err_t audio_hal_get_volume(audio_hal_handle_t audio_hal, int *volume)
     ret = audio_hal->audio_codec_get_volume(volume);
     mutex_unlock(audio_hal->audio_hal_lock);
     return ret;
+}
+
+esp_err_t audio_hal_write_reg(audio_hal_handle_t audio_hal,int reg_add, int data)
+{
+	esp_err_t ret;
+	AUDIO_HAL_CHECK_NULL(audio_hal, "audio_hal handle is null", -1);
+    mutex_lock(audio_hal->audio_hal_lock);
+	ret = audio_hal->audio_codec_write_reg(reg_add, data);
+	mutex_unlock(audio_hal->audio_hal_lock);
+	return ret;
+}
+
+esp_err_t audio_hal_read_reg(audio_hal_handle_t audio_hal, int reg_add, int *data)
+{
+	esp_err_t ret;
+	uint8_t reg = 0;
+	uint8_t ddata = 0;
+	AUDIO_HAL_CHECK_NULL(audio_hal, "audio_hal handle is null", -1);
+    mutex_lock(audio_hal->audio_hal_lock);
+	ret = audio_hal->audio_codec_read_reg(reg_add, ddata);
+	*data = ddata;
+	mutex_unlock(audio_hal->audio_hal_lock);
+	return ret;
 }

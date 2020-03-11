@@ -74,18 +74,6 @@ esp_err_t zl38063_codec_ctrl_state(audio_hal_codec_mode_t mode, audio_hal_ctrl_t
  *     - ESP_OK   Success
  */
 esp_err_t zl38063_codec_config_i2s(audio_hal_codec_mode_t mode, audio_hal_codec_i2s_iface_t *iface);
-
-/**
- * @brief mute or unmute the codec
- *
- * @param mute:  true, false
- *
- * @return
- *     - ESP_OK
- *     - ESP_FAIL
- */
-esp_err_t zl38063_codec_set_voice_mute(bool mute);
-
 /**
  * @brief  Set voice volume
  *
@@ -96,7 +84,6 @@ esp_err_t zl38063_codec_set_voice_mute(bool mute);
  *     - ESP_FAIL
  */
 esp_err_t zl38063_codec_set_voice_volume(int volume);
-
 /**
  * @brief Get voice volume
  *
