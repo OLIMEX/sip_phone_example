@@ -38,6 +38,7 @@ Prepare the audio board:
 
 Load the example:
 ```bash
+cd ~/
 mkdir ~/espwork
 cd ~/espwork
 git clone --recursive https://github.com/OLIMEX/sip_phone_example.git
