@@ -656,8 +656,10 @@ static void list_btn_event_handler(lv_obj_t * btn, lv_event_t event)
 		char * number = "999";//todo
 		for (int x=0;x<5;x++) {
 			if (strcmp(butlabel,Names[x]) == 0)
+			{
 					number = Numbers[x];
 					break;
+			}
 	 
 		}     
 		
