@@ -37,10 +37,10 @@
 
 #define BUTTON_REC_ID             GPIO_NUM_36
 #define BUTTON_MODE_ID            GPIO_NUM_39
-#define BUTTON_SET_ID             TOUCH_PAD_NUM9
-#define BUTTON_PLAY_ID            TOUCH_PAD_NUM8
-#define BUTTON_VOLUP_ID           TOUCH_PAD_NUM7
-#define BUTTON_VOLDOWN_ID         TOUCH_PAD_NUM0
+#define BUTTON_SET_ID             32	//TOUCH_PAD_NUM9
+#define BUTTON_PLAY_ID            33	//TOUCH_PAD_NUM8
+#define BUTTON_VOLUP_ID           27	//TOUCH_PAD_NUM7
+#define BUTTON_VOLDOWN_ID         4	//TOUCH_PAD_NUM0
 
 #define AUXIN_DETECT_GPIO         -1 //GPIO_NUM_12
 #define HEADPHONE_DETCET          -1 //GPIO_NUM_19
